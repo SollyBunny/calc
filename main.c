@@ -47,6 +47,10 @@ int main(int argc, char *argv[]) {
 		Token *t = NULL;
 		tokenize(0, string, &t);
 		free(string);
+		printf("Tokenized: ");
+		tokenprint(t);
+		tokenparse(&t);
+		printf("Parsed: ");
 		tokenprint(t);
 	// free stuff
 		Token *tnew;

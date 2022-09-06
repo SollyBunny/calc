@@ -31,7 +31,6 @@ struct Token {
 typedef struct Token Token;
 
 typedef struct {
-	unsigned int used;
 	long hash;
 	unsigned int type;
 	union {
@@ -53,7 +52,7 @@ void tokenprint(Token *t);
 void tokenfree(Token *t);
 void tokenadd(Token **t, unsigned int type, void *arg1, void *arg2);
 void tokenize(unsigned int depth, char *string, Token **t);
-void tokenparse(Token *t);
+void tokenparse(Token **t);
 
 #include "config.h"
 #include "var.h"

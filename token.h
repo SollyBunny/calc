@@ -162,8 +162,39 @@ void tokenize(unsigned int depth, char *string, Token **t) {
 	return;
 }
 
-void tokenparse(Token *t) {
-	(void)t;
+void tokenparse(Token **t) {
+	if (*t == NULL) return;
+	Token *i = *t;
+	do {
+		if (i->type != VARIABLE) continue;
+		for (unsigned int m = 0; m < varalloc; ++m) {
+			if (vars[m].type == NUL) continue;
+			if (vars[m].hash != i->v.variable) continue;
+			if (vars[m].type == NUMBER) {
+				i->type = NUMBER;
+				mpf_init(i->v.number);
+				mpf_set(i->v.number, vars[m].v.number);
+				goto l_parse_good;
+			}
+		}
+		die("Invalid variable");
+		l_parse_good: continue; // stop old gcc error
+	} while ((i = i->last) != NULL);
+
+	Token *m;
+	i = *t;
+	if (i->last == NULL || i->last->last == NULL) return;
+	while (1) {	
+		if (i->type == NUMBER && i->last->type == OPERATOR && i->last->last->type == NUMBER && i->last->v.operator == MUL ) {
+			mpf_mul(i->v.number, i->v.number, i->last->last->v.number);
+			m = i->last->last->last;
+			tokenfree(i->last->last);
+			tokenfree(i->last);
+			if (m == NULL || m->last == NULL) return;
+			i = m->last;
+		} else i = i->last;
+		if (i->last->last == NULL) break;
+	}
 }
 
 #endif

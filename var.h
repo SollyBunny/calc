@@ -18,17 +18,25 @@ void varfree(unsigned int i) {
 int varadd(const char *str, unsigned int type, void *value) {
 	unsigned int i;
 	if (varalloc == 0) {
-		i = 0;
 		varalloc = 16;
 		vars = malloc(sizeof(vars[0]) * varalloc);
+		for (i = 0; i < varalloc; ++i) {
+			vars[i].type = NUL;
+		}
+		i = 0;
 	} else { // find open space
-		for (; i < varalloc && vars[i].used == 0; ++i);
+		for (; i < varalloc && vars[i].type == NUL; ++i);
 		if (i == varalloc) {
+			
+			vars = realloc(vars, sizeof(vars[0]) * varalloc * 2);
+			for (i = varalloc; i < varalloc * 2; ++i) {
+				vars[i].type = NUL;
+			}
+			i = varalloc;
 			varalloc *= 2;
-			vars = realloc(vars, sizeof(vars[0]) * varalloc);
+			
 		}
 	}
-	vars[i].used = 1;
 	vars[i].hash = hash(str);
 	vars[i].type = type;
 	switch (type) {
