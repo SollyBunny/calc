@@ -1,0 +1,6 @@
+replit.nix
+vgcore*
+.ccls-cache
+.gitignore
+gmpbuild
+gmp/build
