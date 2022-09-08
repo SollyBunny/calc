@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
 		printf("'%s' (%lu)\n", string, size);
 	// setup
 		mpf_set_default_prec(PRECISION);
-		varsetup();
+		setup();
 	// tokenize
 		Token *t = NULL;
 		tokenize(0, string, &t);

@@ -37,7 +37,13 @@ typedef struct {
 		mpf_t number;
 	} v;
 } Variable;
-Variable *variables;
+extern Variable *variables;
+
+typedef struct {
+	unsigned int op;
+	void (*func)(mpf_t x, mpf_t y);
+} Operator;
+extern Operator *operators;
 
 extern void __attribute__((noreturn)) die(const char msg[]);
 #define ADDHASH(v, t) (v) = (t) + ((v) << 6) + ((v) << 16) - (v)
@@ -48,6 +54,10 @@ extern void varfree(unsigned int i);
 extern int  varadd(const char *str, unsigned int type, void *value);
 extern void varsetup();
 
+extern Operator *operators;
+extern unsigned int operatorsused;
+extern void operatoradd(unsigned int op, void (*func)(mpf_t x, mpf_t y));
+
 void tokenprint(Token *t);
 void tokenfree(Token *t);
 void tokenadd(Token **t, unsigned int type, void *arg1, void *arg2);
@@ -57,5 +67,6 @@ void tokenparse(Token **t);
 #include "config.h"
 #include "var.h"
 #include "token.h"
+#include "operator.h"
 
 #endif

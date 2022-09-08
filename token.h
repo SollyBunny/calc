@@ -90,6 +90,8 @@ void tokenize(unsigned int depth, char *string, Token **t) {
 			case '-': type = SUB; goto l_parse_token;
 			case '*': type = MUL; goto l_parse_token;
 			case '/': type = DIV; goto l_parse_token;
+			case '%': type = MOD; goto l_parse_token;
+			case '^': type = EXP; goto l_parse_token;
 			case '\0': type = 0; l_parse_token:
 				if (tokentype == VARIABLE) {
 					tokenadd(t, VARIABLE, (void *)decimal, NULL);
@@ -182,6 +184,38 @@ void tokenparse(Token **t) {
 	} while ((i = i->last) != NULL);
 
 	Token *m;
+	Operator op;
+	for (unsigned int _ = 0; _ < operatorsused; ++_) {
+		op = operators[_];
+		i = *t;
+		if (i->last == NULL || i->last->last == NULL) continue;
+		while (1) {	
+			if (i->type == NUMBER && i->last->type == OPERATOR && i->last->last->type == NUMBER && i->last->v.operator == op.op) {
+				op.func(i->v.number, i->last->last->v.number);
+				m = i->last->last->last;
+				tokenfree(i->last->last);
+				tokenfree(i->last);
+				i->last = m;
+				i = m;
+				if (m == NULL || m->last == NULL) break;
+			} else i = i->last;
+			if (i->last->last == NULL) break;
+		}
+	}
+	
+	/*if (i->last == NULL || i->last->last == NULL) return;
+	while (1) {	
+		if (i->type == NUMBER && i->last->type == OPERATOR && i->last->last->type == NUMBER && i->last->v.operator == MUL ) {
+			mpf_mul(i->v.number, i->v.number, i->last->last->v.number);
+			m = i->last->last->last;
+			tokenfree(i->last->last);
+			tokenfree(i->last);
+			if (m == NULL || m->last == NULL) return;
+			i = m->last;
+		} else i = i->last;
+		if (i->last->last == NULL) break;
+		}
+	}
 	i = *t;
 	if (i->last == NULL || i->last->last == NULL) return;
 	while (1) {	
@@ -194,7 +228,8 @@ void tokenparse(Token **t) {
 			i = m->last;
 		} else i = i->last;
 		if (i->last->last == NULL) break;
-	}
+		}
+	}*/
 }
 
 #endif
