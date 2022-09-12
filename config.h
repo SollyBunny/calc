@@ -2,7 +2,9 @@
 #define CONFIG_H
 #include "include.h"
 
-#define PRECISION 100
+#ifndef PRECISION
+	#define PRECISION 100
+#endif
 
 void o_mul(mpf_t x, mpf_t y) {
 	mpf_mul(x, y, x);
@@ -29,13 +31,31 @@ void o_exp(mpf_t x, mpf_t y) {
 	mpf_set(x, y);
 }
 
+mpf_t pi;
 void setup() {
-	varadd("x", NUMBER, "30");
+
+	mpf_t out;
+	mpf_init(out);
+	mpf_t in;
+	mpf_init_set_ui(in, 8);
+	mpf_log2(out, in);
+	gmp_printf("Log2 of 8: %Ff\n", out);
+
+	varadd("pi", NUMBER, NULL);
+	mpf_pi(vars[0].v.number);
+	
+	/*mpf_t deg;
+	mpf_init(deg);
+	mpf_pi(deg);
+	mpf_ui_div(deg, 180, deg);
+	varadd("deg", PRENUMBER, deg);*/
+	
 	operatoradd(MUL, &o_mul);
 	operatoradd(DIV, &o_div);
 	operatoradd(ADD, &o_add);
 	operatoradd(SUB, &o_sub);
 	operatoradd(EXP, &o_exp);
+	
 }
 
 #endif

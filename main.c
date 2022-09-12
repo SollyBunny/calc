@@ -48,19 +48,20 @@ int main(int argc, char *argv[]) {
 		tokenize(0, string, &t);
 		free(string);
 		printf("Tokenized: ");
-		tokenprint(t);
+		tokenprint(t, 1);
 		tokenparse(&t);
 		printf("Parsed: ");
-		tokenprint(t);
+		tokenprint(t, 1);
 	// free stuff
 		Token *tnew;
 		do {
-			tnew = t->last;
+			tnew = t->next;
 			tokenfree(t);
 			t = tnew;
 		} while (t != NULL);
 		for (unsigned int i = 0; i < varalloc; ++i) varfree(i);
 		free(vars);
+		free(operators);
 	return 0;	
 
 }

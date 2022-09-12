@@ -15,7 +15,7 @@ void varfree(unsigned int i) {
 }
 
 // Add a var
-int varadd(const char *str, unsigned int type, void *value) {
+void varadd(const char *str, unsigned int type, void *value) {
 	unsigned int i;
 	if (varalloc == 0) {
 		varalloc = 16;
@@ -27,7 +27,6 @@ int varadd(const char *str, unsigned int type, void *value) {
 	} else { // find open space
 		for (; i < varalloc && vars[i].type == NUL; ++i);
 		if (i == varalloc) {
-			
 			vars = realloc(vars, sizeof(vars[0]) * varalloc * 2);
 			for (i = varalloc; i < varalloc * 2; ++i) {
 				vars[i].type = NUL;
@@ -41,7 +40,11 @@ int varadd(const char *str, unsigned int type, void *value) {
 	vars[i].type = type;
 	switch (type) {
 		case NUMBER:
-			mpf_init_set_str(vars[i].v.number, (const char*)value, 10);
+			if (value == NULL) {
+				mpf_init(vars[i].v.number);
+			} else {
+				mpf_init_set_str(vars[i].v.number, (const char*)value, 10);
+			}
 			break;
 		default:
 			die("Unknown variable type");

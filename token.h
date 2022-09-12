@@ -3,15 +3,25 @@
 #include "include.h"
 
 // Print all tokens before token t
-void tokenprint(Token *t) {
-	printf("Tokens:");
-	if (t == NULL) {
-		printf("\n	None\n");
-		return;
+void tokenprint(Token *t, unsigned int all) {
+	if (all == 0) {
+		printf("Token: ");
+		if (t == NULL) {
+			printf("None\n");
+			return;
+		}
+		goto l_print_start;
+	} else {
+		printf("Tokens:");
+		if (t == NULL) {
+			printf("\n	None\n");
+			return;
+		}
 	}
 	unsigned int i = 1;
 	do {
 		printf("\n	%d: ", i);
+		l_print_start:
 		switch (t->type) {
 			case OPERATOR:
 				printf("Operator '");
@@ -35,7 +45,8 @@ void tokenprint(Token *t) {
 				printf("Variable: %ld (hash)", t->v.variable);
 				break;
 		}
-		t = t->last;
+		if (all == 0) break;
+		t = t->next;
 		++i;
 	} while (t != NULL);
 	putchar('\n');
@@ -54,13 +65,12 @@ void tokenfree(Token *t) {
 void tokenadd(Token **t, unsigned int type, void *arg1, void *arg2) {
 	if (*t == NULL) {
 		*t = malloc(sizeof(**t));
-		(*t)->last = NULL;
+		(*t)->next = NULL;
 	} else {
-		(*t)->next = malloc(sizeof(**t));
-		(*t)->next->last = (*t);
-		(*t) = (*t)->next;
+		Token *i = *t;
+		(*t) = malloc(sizeof(**t));
+		(*t)->next = i;
 	}
-	(*t)->next = NULL;
 	(*t)->type = type;
 	switch (type) {
 		case NUMBER:
@@ -181,55 +191,34 @@ void tokenparse(Token **t) {
 		}
 		die("Invalid variable");
 		l_parse_good: continue; // stop old gcc error
-	} while ((i = i->last) != NULL);
+	} while ((i = i->next) != NULL);
 
 	Token *m;
 	Operator op;
 	for (unsigned int _ = 0; _ < operatorsused; ++_) {
 		op = operators[_];
 		i = *t;
-		if (i->last == NULL || i->last->last == NULL) continue;
+		if (i->next == NULL || i->next->next == NULL) continue;
 		while (1) {	
-			if (i->type == NUMBER && i->last->type == OPERATOR && i->last->last->type == NUMBER && i->last->v.operator == op.op) {
-				op.func(i->v.number, i->last->last->v.number);
-				m = i->last->last->last;
-				tokenfree(i->last->last);
-				tokenfree(i->last);
-				i->last = m;
-				i = m;
-				if (m == NULL || m->last == NULL) break;
-			} else i = i->last;
-			if (i->last->last == NULL) break;
+			printf("%p ", i);
+			if (i->type == NUMBER && i->next->type == OPERATOR && i->next->next->type == NUMBER && i->next->v.operator == op.op) {
+				op.func(i->v.number, i->next->next->v.number);
+				m = i->next->next->next;
+				tokenfree(i->next->next);
+				tokenfree(i->next);
+				i->next = m;
+				if (i == NULL || i->next == NULL) {
+					printf("break: 1 %lu\n", (long unsigned int)i / sizeof(*i));
+					break;
+				}
+			} else i = i->next;
+			if (i->next->next == NULL) {
+				printf("break: 2 %lu\n", (long unsigned int)i / sizeof(*i));
+				break;
+			}
 		}
 	}
 	
-	/*if (i->last == NULL || i->last->last == NULL) return;
-	while (1) {	
-		if (i->type == NUMBER && i->last->type == OPERATOR && i->last->last->type == NUMBER && i->last->v.operator == MUL ) {
-			mpf_mul(i->v.number, i->v.number, i->last->last->v.number);
-			m = i->last->last->last;
-			tokenfree(i->last->last);
-			tokenfree(i->last);
-			if (m == NULL || m->last == NULL) return;
-			i = m->last;
-		} else i = i->last;
-		if (i->last->last == NULL) break;
-		}
-	}
-	i = *t;
-	if (i->last == NULL || i->last->last == NULL) return;
-	while (1) {	
-		if (i->type == NUMBER && i->last->type == OPERATOR && i->last->last->type == NUMBER && i->last->v.operator == MUL ) {
-			mpf_mul(i->v.number, i->v.number, i->last->last->v.number);
-			m = i->last->last->last;
-			tokenfree(i->last->last);
-			tokenfree(i->last);
-			if (m == NULL || m->last == NULL) return;
-			i = m->last;
-		} else i = i->last;
-		if (i->last->last == NULL) break;
-		}
-	}*/
 }
 
 #endif
